@@ -9,6 +9,8 @@ import torchvision.transforms as transforms
 import openslide
 import PIL.Image as Image
 import argparse
+import numpy as np
+import pandas as pd
 
 class slide_dataset(data.Dataset):
     '''
@@ -34,7 +36,8 @@ class slide_dataset(data.Dataset):
         img = self.slide.read_region((int(row.x), int(row.y)), int(self.level), (self.size, self.size)).convert('RGB')
         if self.mult != 1:
             img = img.resize((self.tilesize, self.tilesize), Image.LANCZOS)
-        img = self.transform(img)
+        if self.transform is not None:
+        	img = self.transform(img)
         return img
     def __len__(self):
         return len(self.df)
@@ -50,7 +53,7 @@ def get_model():
 ############################
 
 ##### Transform Definition #####
-def get_trasform():
+def get_transform():
     # Define image transform
     return transforms.Compose([
         transforms.ToTensor(),
@@ -96,7 +99,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--slide_data', type=str, default='', help='path to slide data csv file. It should include the following columns: ')
-    parser.add_argument('--tile_data', type=str, default='', help='path to tile datacsv file. It should include the following columns: ')
+    parser.add_argument('--tile_data', type=str, default='', help='path to tile data csv file. It should include the following columns: ')
     parser.add_argument('--output', type=str, default='', help='path to the output directory where .pth files will be saved.')
     parser.add_argument('--batch_size', type=int, default=128, help='batchs size')
     parser.add_argument('--workers', type=int, default=10, help='workers')
